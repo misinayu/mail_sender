@@ -60,9 +60,13 @@ class _MailPackage extends State<MailPackage> {
       _mail_to = prefs.getString('mail_to') ?? '';
       _mail_cc = prefs.getString('mail_cc') ?? '';
       _name = prefs.getString('name') ?? '';
+      _header = prefs.getString('header') ?? '';
+      _footer = prefs.getString('footer') ?? '';
       emailController.text = _mail_to;
       mailToController.text = _mail_cc;
       nameController.text = _name;
+      headerController.text = _header;
+      footerController.text = _footer;
     });
   }
 
@@ -232,65 +236,98 @@ class _MailPackage extends State<MailPackage> {
           appBar: AppBar(
             title: Text('設定'),
           ),
-          body: Container(
-            padding: const EdgeInsets.all(50.0),
-            child: Column(
-              children: <Widget>[
-                new TextField(
-                  enabled: true,
-                  maxLength: 30,
-                  maxLengthEnforced: false,
-                  style: TextStyle(color: Colors.red),
-                  obscureText: false,
-                  maxLines: 1,
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.face),
-                      labelText: 'To',
-                      hintText: 'メールアドレスを入力してください'),
+          resizeToAvoidBottomPadding: false,
+          body: SingleChildScrollView(
+              reverse: true,
+              child: Container(
+                padding: const EdgeInsets.all(50.0),
+                child: Column(
+                  children: <Widget>[
+                    new TextField(
+                      enabled: true,
+                      maxLength: 30,
+                      maxLengthEnforced: false,
+                      style: TextStyle(color: Colors.red),
+                      obscureText: false,
+                      maxLines: 1,
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                          icon: Icon(Icons.face),
+                          labelText: 'To',
+                          hintText: 'メールアドレスを入力してください'),
+                    ),
+                    new TextField(
+                      enabled: true,
+                      maxLength: 30,
+                      maxLengthEnforced: false,
+                      style: TextStyle(color: Colors.red),
+                      obscureText: false,
+                      maxLines: 1,
+                      controller: mailToController,
+                      decoration: const InputDecoration(
+                          icon: Icon(Icons.face),
+                          labelText: 'Cc',
+                          hintText: 'メールアドレスを入力してください'),
+                    ),
+                    new TextField(
+                      enabled: true,
+                      maxLength: 30,
+                      maxLengthEnforced: false,
+                      style: TextStyle(color: Colors.red),
+                      obscureText: false,
+                      maxLines: 1,
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                          icon: Icon(Icons.face),
+                          labelText: '送信者名',
+                          hintText: '自身の名前を入力してください'),
+                    ),
+                    new TextField(
+                      enabled: true,
+                      maxLengthEnforced: false,
+                      style: TextStyle(color: Colors.red),
+                      keyboardType: TextInputType.multiline,
+                      obscureText: false,
+                      maxLines: null,
+                      controller: headerController,
+                      decoration: const InputDecoration(
+                          icon: Icon(Icons.face),
+                          labelText: 'Header',
+                          hintText: 'メールのヘッダーを入力してください'),
+                    ),
+                    new TextField(
+                      enabled: true,
+                      maxLengthEnforced: false,
+                      style: TextStyle(color: Colors.red),
+                      obscureText: false,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      controller: footerController,
+                      decoration: const InputDecoration(
+                          icon: Icon(Icons.face),
+                          labelText: 'Footer',
+                          hintText: 'メールのフッダーを入力してください'),
+                    ),
+                    RaisedButton(
+                      child: Text('保存'),
+                      onPressed: () {
+                        setState(() {
+                          _mail_to = emailController.text;
+                          _mail_cc = mailToController.text;
+                          _name = nameController.text;
+                          _header = headerController.text;
+                          _footer = footerController.text;
+                          _saveMailTo('mail_to', _mail_to);
+                          _saveMailTo('mail_cc', _mail_cc);
+                          _saveMailTo('name', _name);
+                          _saveMailTo('header', _header);
+                          _saveMailTo('footer', _footer);
+                        });
+                      },
+                    )
+                  ],
                 ),
-                new TextField(
-                  enabled: true,
-                  maxLength: 30,
-                  maxLengthEnforced: false,
-                  style: TextStyle(color: Colors.red),
-                  obscureText: false,
-                  maxLines: 1,
-                  controller: mailToController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.face),
-                      labelText: 'Cc',
-                      hintText: 'メールアドレスを入力してください'),
-                ),
-                new TextField(
-                  enabled: true,
-                  maxLength: 30,
-                  maxLengthEnforced: false,
-                  style: TextStyle(color: Colors.red),
-                  obscureText: false,
-                  maxLines: 1,
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.face),
-                      labelText: '送信者名',
-                      hintText: '自身の名前を入力してください'),
-                ),
-                RaisedButton(
-                  child: Text('保存'),
-                  onPressed: () {
-                    setState(() {
-                      _mail_to = emailController.text;
-                      _mail_cc = mailToController.text;
-                      _name = nameController.text;
-                      _saveMailTo('mail_to', _mail_to);
-                      _saveMailTo('mail_cc', _mail_cc);
-                      _saveMailTo('name', _name);
-                    });
-                  },
-                )
-              ],
-            ),
-          ));
+              )));
     }));
   }
 
@@ -336,12 +373,12 @@ class _MailPackage extends State<MailPackage> {
       other = '特になし';
     }
 
-    return '${_createHeader()}'
+    return '${headerController.text}\n\n'
         '<稼働時間>'
         '${_start_time.hour}:${_start_time.minute.toString().padLeft(2, '0')}'
         ' ~ ${_end_time.hour}:${_end_time.minute.toString().padLeft(2, '0')}\n\n'
         '<休憩時間>\n'
-        ''
+        '${_selectedItem}'
         '<実務記録>\n'
         '$task\n\n'
         '<うまくいったこと>\n'
@@ -350,15 +387,6 @@ class _MailPackage extends State<MailPackage> {
         '$improve\n\n'
         '<その他>\n'
         '$other\n\n\n'
-        '${_createHooter()}';
-  }
-
-  String _createHeader() {
-    return 'お疲れさまです。山本です。\n'
-        '本日の日報を提出致します。';
-  }
-
-  String _createHooter() {
-    return 'from 山本';
+        '${footerController.text}';
   }
 }
